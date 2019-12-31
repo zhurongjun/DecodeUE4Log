@@ -114,7 +114,7 @@ bool CUELogFile::LoadLogFile(const char * Path)
 	CurIndex = UELogHelper::FindLogHeaderEnd(BufBegin, BufEnd);
 	m_LogHeader.SetStr(BufBegin, CurIndex);
 
-	// decode log
+	// loop decode log
 	CUELog * TempLog = nullptr;
 	const char * NextIndex = nullptr;
 	while (CurIndex < BufEnd)
@@ -128,6 +128,7 @@ bool CUELogFile::LoadLogFile(const char * Path)
 
 		m_AllLogs.push_back(TempLog);
 
+		// decode failed
 		if (!IsDecodeSucess)
 		{
 			Clear();
