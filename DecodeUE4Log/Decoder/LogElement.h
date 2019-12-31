@@ -79,14 +79,17 @@ enum ECompareMask
 };
 
 // ÕÚÕÖÏíÔª
+class CUELogTime;
 class CMaskFlyWeight
 {
 public:
-	CMaskFlyWeight() :m_Mask(ECompareMask::MaskMSecond) {}
+	CMaskFlyWeight() :m_Mask(ECompareMask::MaskMSecond),m_LastLog(nullptr) {}
 	ECompareMask GetMask() const { return m_Mask; }
+	void UpDateFlyWeight(const CUELogTime * Time);
 	ECompareMask SetMask(ECompareMask Mask) { m_Mask = Mask; }
 private:
 	ECompareMask m_Mask;
+	const CUELogTime * m_LastLog;
 };
 
 class CUELogTime final
@@ -103,6 +106,7 @@ public:
 	USHORT GetMSecond() const { return m_MSecond; }
 	const CMaskFlyWeight * GetMaskFlyWeight() const { return m_MaskFlyWeight; }
 	void SetMaskFlyWeight(const CMaskFlyWeight * maskFlyWeight) { m_MaskFlyWeight = maskFlyWeight; }
+	CMemcutStr GetTimeStr() const { return m_TimeStr; }
 
 	bool YearIsValid() const { return true; }
 	bool MouthIsValid() const { return m_Mouth > 0 && m_Mouth <= 12; }
@@ -122,38 +126,8 @@ public:
 			MSecondIsValid();
 	}
 
-	bool operator>(const CUELogTime & Other) const
-	{
-		switch (m_MaskFlyWeight ? m_MaskFlyWeight->GetMask() : ECompareMask::MaskYear)
-		{
-		case ECompareMask::MaskYear:
-			if (m_Year < Other.m_Year) return false;
-			if (m_Year > Other.m_Year) return true;
-		case ECompareMask::MaskMouth:
-			if (m_Mouth < Other.m_Mouth) return false;
-			if (m_Mouth > Other.m_Mouth) return true;
-		case ECompareMask::MaskDay:
-			if (m_Day < Other.m_Day) return false;
-			if (m_Day > Other.m_Day) return true;
-		case ECompareMask::MaskHour:
-			if (m_Hour < Other.m_Hour) return false;
-			if (m_Hour > Other.m_Hour) return true;
-		case ECompareMask::MaskMinute:
-			if (m_Minute < Other.m_Minute) return false;
-			if (m_Minute > Other.m_Minute) return true;
-		case ECompareMask::MaskSecond:
-			if (m_Second < Other.m_Second) return false;
-			if (m_Second > Other.m_Second) return true;
-		case ECompareMask::MaskMSecond:
-			if (m_MSecond < Other.m_MSecond) return false;
-			if (m_MSecond > Other.m_MSecond) return true;
-		}
-		return true;
-	}
-	bool operator<(const CUELogTime & Other) const
-	{
-		return !(*this > Other);
-	}
+	bool operator>(const CUELogTime & Other) const;
+	bool operator<(const CUELogTime & Other) const;
 	bool operator==(const CUELogTime & Other) const
 	{
 		return	m_Year == Other.m_Year &&
@@ -166,11 +140,11 @@ public:
 	}
 	bool operator >= (const CUELogTime & Other) const
 	{
-		return *this > Other || *this == Other;
+		return *this == Other || *this > Other;
 	}
 	bool operator <= (const CUELogTime & Other) const
 	{
-		return *this < Other || *this == Other;
+		return *this == Other || *this < Other;
 	}
 
 	void ClearTimeInfo() { m_Year = m_MSecond = 0; m_Mouth = m_Day = m_Hour = m_Minute = m_Second = 0; }
@@ -191,4 +165,3 @@ private:
 
 	const CMaskFlyWeight *	m_MaskFlyWeight;
 };
-

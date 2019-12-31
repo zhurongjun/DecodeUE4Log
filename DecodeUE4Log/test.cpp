@@ -1,6 +1,7 @@
 #include "Decoder/UE4Log.h"
 #include <stdio.h>
 #include <string>
+#include <algorithm>
 
 int main()
 {
@@ -14,6 +15,12 @@ int main()
 	Log.LoadLogFile(Path);
 
 	printf("¹²½âÎö%dÌõLog\n", Log.GetLogCount());
+	std::sort(Log.GetAllLogs().begin(), Log.GetAllLogs().end(), &UELogHelper::CompareLogByTime_Min);
+
+	for (int i = 0; i < 100; i++)
+	{
+		printf("%s\n", Log.GetAllLogs()[i]->GetLogTime().GetTimeStr().GetString().c_str());
+	}
 
 	system("Pause");
 	return 0;

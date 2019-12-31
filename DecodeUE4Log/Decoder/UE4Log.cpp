@@ -96,8 +96,8 @@ bool CUELogFile::LoadLogFile(const char * Path)
 	if (accessRet == ENOENT || accessRet == EINVAL) return false;
 
 	// get file size
-	struct __stat64 buf;
-	__stat64(Path, &buf);
+	struct stat buf;
+	stat(Path, &buf);
 
 	// create buf and read file
 	m_FileContent = new char[buf.st_size];
@@ -111,19 +111,22 @@ bool CUELogFile::LoadLogFile(const char * Path)
 	const char * BufBegin = m_FileContent;
 	const char * BufEnd = m_FileContent + size;
 	const char * CurIndex = BufBegin;
-	CurIndex = UELogDecodeHelper::FindLogHeaderEnd(BufBegin, BufEnd);
+	CurIndex = UELogHelper::FindLogHeaderEnd(BufBegin, BufEnd);
 	m_LogHeader.SetStr(BufBegin, CurIndex);
 
 	// decode log
 	CUELog * TempLog = nullptr;
 	const char * NextIndex = nullptr;
-	int MaskCheckValue;
 	while (CurIndex < BufEnd)
 	{
 		TempLog = new CUELog(this);
+		
 		bool IsDecodeSucess = TempLog->TryDecodeLog(CurIndex, BufEnd, NextIndex);
-		m_AllLogs.push_back(TempLog);
+
+		m_MaskFlyWeight.UpDateFlyWeight(&TempLog->GetLogTime());
 		CurIndex = NextIndex;
+
+		m_AllLogs.push_back(TempLog);
 
 		if (!IsDecodeSucess)
 		{
@@ -147,7 +150,7 @@ void CUELogFile::Clear()
 	m_LogTypeDictionry.Clear();
 }
 
-const char * UELogDecodeHelper::FindLogHeaderEnd(const char * Begin, const char * End)
+const char * UELogHelper::FindLogHeaderEnd(const char * Begin, const char * End)
 {
 	if (!(Begin && End)) return nullptr;
 	const char * CurIndex = Begin;
@@ -160,7 +163,16 @@ const char * UELogDecodeHelper::FindLogHeaderEnd(const char * Begin, const char 
 	return CurIndex;
 }
 
-void UELogDecodeHelper::UpdateMaskFlyWeight(int & MaskCheckValue, CMaskFlyWeight * maskFlyWeight, const CUELogTime & time)
+bool UELogHelper::CompareLogByTime_Max(CUELog * LogA, CUELog * LogB)
 {
-	
+	if (!LogA) return true;
+	if (!LogB) return false;
+	return LogA->GetLogTime() > LogB->GetLogTime();
+}
+
+bool UELogHelper::CompareLogByTime_Min(CUELog * LogA, CUELog * LogB)
+{
+	if (!LogA) return false;
+	if (!LogB) return true;
+	return LogA->GetLogTime() < LogB->GetLogTime();
 }

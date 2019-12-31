@@ -5,6 +5,16 @@
 using std::vector;
 using std::function;
 
+class CUELog;
+namespace UELogHelper
+{
+	// 查找Log头的结尾
+	const char * FindLogHeaderEnd(const char * Begin, const char * End);
+	// 比较函数
+	bool CompareLogByTime_Min(CUELog * LogA, CUELog * LogB);
+	bool CompareLogByTime_Max(CUELog * LogA, CUELog * LogB);
+}
+
 class CUELogFile;
 class CUELog
 {
@@ -34,12 +44,6 @@ private:
 	CUELogFile *	m_LogFile;
 };
 
-namespace UELogDecodeHelper
-{
-	const char * FindLogHeaderEnd(const char * Begin, const char * End);
-	void UpdateMaskFlyWeight(int & MaskCheckValue, CMaskFlyWeight * maskFlyWeight, const CUELogTime & time);
-}
-
 class CUELogFile
 {
 public:
@@ -52,6 +56,8 @@ public:
 	LogTypeCode GetLogTypeCode(string name) { return m_LogTypeDictionry.GetTypeCode(name); }
 
 	const CMaskFlyWeight * GetTimeMaskFlyWeight() const { return &m_MaskFlyWeight; }
+	vector<CUELog *> & GetAllLogs() { return m_AllLogs; }
+	CMemcutStr GetLogHeader() { return m_LogHeader; }
 
 	bool LoadLogFile(const char * Path);
 	void Clear();
@@ -59,10 +65,11 @@ public:
 	int GetLogCount() { return m_AllLogs.size(); }
 
 private:
-	CLogTypeDictionry	m_LogTypeDictionry;
-	char *				m_FileContent;
-	CMaskFlyWeight		m_MaskFlyWeight;
+	char *				m_FileContent;		// 存储这个Log内容的Buffer
 
-	CMemcutStr			m_LogHeader;
-	vector<CUELog *>	m_AllLogs;
+	CLogTypeDictionry	m_LogTypeDictionry;	// Log类型字典，存储了所有的类型名，并建立了LogTypeCode->name的快速映射
+	CMaskFlyWeight		m_MaskFlyWeight;	// 时间遮罩，为了提高按时间排序的效率
+
+	CMemcutStr			m_LogHeader;		// 从文件头到第一行Log的Log头，UE使用这个头来记录正式启动之前的Log
+	vector<CUELog *>	m_AllLogs;			// 所有的Log信息
 };
