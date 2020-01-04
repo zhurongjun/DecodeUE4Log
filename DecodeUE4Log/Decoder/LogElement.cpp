@@ -17,7 +17,7 @@ bool CMemcutStr::CopyStr(char * outBuf, int Len) const
 	return true;
 }
 
-string CMemcutStr::GetString() const
+string CMemcutStr::ToString() const
 {
 	if (!(m_Begin && m_End)) return string();
 
@@ -166,9 +166,21 @@ LogTypeCode CLogTypeDictionry::GetTypeCode(string name)
 			return it.first;
 		}
 	}
+	if (m_Locked) return -1;
+	
 	++m_TypeCount;
 	m_Dictionry[m_TypeCount] = name;
 	return m_TypeCount;
+}
+
+vector<string> CLogTypeDictionry::GetLogTypeNames()
+{
+	vector<string> AllNames(m_Dictionry.size());
+	for (auto it : m_Dictionry)
+	{
+		AllNames[it.first - 1] = it.second;
+	}
+	return AllNames;
 }
 
 void CMaskFlyWeight::UpDateFlyWeight(const CUELogTime * Time)

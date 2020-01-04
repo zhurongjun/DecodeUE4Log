@@ -1,10 +1,12 @@
 #pragma once
 #include <map>
 #include <string>
+#include <vector>
 using std::map;
 using std::string;
 using std::shared_ptr;
 using std::weak_ptr;
+using std::vector;
 using std::make_shared;
 
 typedef unsigned short USHORT;
@@ -15,10 +17,10 @@ const unsigned int TIMESTR_LENGTH = 23;
 
 enum ELogLevel
 {
-	Unknow,
-	Message,
-	Warning,
-	Error
+	Unknow = 0,
+	Message = 1 << 1,
+	Warning = 1 << 2,
+	Error = 1 << 3
 };
 
 // 在一个字符数组中划分一部分字符组成的字符串
@@ -41,7 +43,7 @@ public:
 
 	int Length() const { return (m_Begin && m_End) ? m_End - m_Begin : 0; }
 	bool CopyStr(char * outBuf, int Len) const;
-	string GetString() const;
+	string ToString() const;
 
 private:
 	const char * m_Begin;
@@ -52,18 +54,29 @@ private:
 class CLogTypeDictionry final
 {
 public:
+	CLogTypeDictionry() : m_TypeCount(0), m_Locked(false) {}
 	bool Contain(LogTypeCode code) const;
 	bool Contain(string name) const;
 
 	string GetTypeName(LogTypeCode code) const { auto it = m_Dictionry.find(code); return it == m_Dictionry.end() ? string() : it->second; }
 	LogTypeCode GetTypeCode(string name);
+	int GetLogTypeCount() { return m_Dictionry.size(); }
 
 	int GetTypeCount() { return m_TypeCount; }
 	void Clear() { m_TypeCount = 0; m_Dictionry.clear(); }
 
+	void Lock() { m_Locked = true; }
+	void Unlock() { m_Locked = false; }
+
+	vector<string> GetLogTypeNames();
+private:
+
 private:
 	map<LogTypeCode, string>	m_Dictionry;
+	vector<int>					m_SortCode;
+
 	int		m_TypeCount;
+	bool	m_Locked;
 };
 
 // 比较遮罩，遮罩级别之上的Log时间不会参与比较，用于提高性能

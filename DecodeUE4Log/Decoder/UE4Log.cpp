@@ -36,9 +36,20 @@ bool CUELog::TryDecodeLog(const char * Begin, const char * End, const char *& In
 		++NameLength;
 		++Begin;
 		if (Begin >= End) return false;
+
+		// no log type
+		if (*Begin == '[' && CUELogTime::StrIsTime(Begin + 1, TIMESTR_LENGTH))
+		{
+			Begin -= NameLength + 2;
+			NameLength = 0;
+			break;
+		}
 	}
 	m_LogTypeName.SetStr(Begin - NameLength, Begin);
-	m_LogTypeCode = m_LogFile->GetLogTypeCode(m_LogTypeName.GetString());
+	if (NameLength == 0)
+		m_LogTypeCode = m_LogFile->GetLogTypeCode("Unknown");
+	else
+		m_LogTypeCode = m_LogFile->GetLogTypeCode(m_LogTypeName.ToString());
 	Begin += 2;	// move to log content
 
 	// decode log level and move pointer to content
@@ -89,6 +100,7 @@ CUELogFile::~CUELogFile()
 bool CUELogFile::LoadLogFile(const char * Path)
 {
 	Clear();
+	m_LogTypeDictionry.Unlock();
 	if (!Path) return false;
 
 	// verify file exist
@@ -136,6 +148,7 @@ bool CUELogFile::LoadLogFile(const char * Path)
 		}
 	}
 
+	m_LogTypeDictionry.Lock();
 	return true;
 }
 
@@ -164,16 +177,44 @@ const char * UELogHelper::FindLogHeaderEnd(const char * Begin, const char * End)
 	return CurIndex;
 }
 
-bool UELogHelper::CompareLogByTime_Max(CUELog * LogA, CUELog * LogB)
+bool UELogHelper::CompareLogByTime_Asce(CUELog * LogA, CUELog * LogB)
+{
+	if (!LogA) return false;
+	if (!LogB) return true;
+	return LogA->GetLogTime() < LogB->GetLogTime();
+}
+
+bool UELogHelper::CompareLogByTime_Desc(CUELog * LogA, CUELog * LogB)
 {
 	if (!LogA) return true;
 	if (!LogB) return false;
 	return LogA->GetLogTime() > LogB->GetLogTime();
 }
 
-bool UELogHelper::CompareLogByTime_Min(CUELog * LogA, CUELog * LogB)
+bool UELogHelper::CompareLogByLevel_Asce(CUELog * LogA, CUELog * LogB)
 {
 	if (!LogA) return false;
 	if (!LogB) return true;
-	return LogA->GetLogTime() < LogB->GetLogTime();
+	return LogA->GetLogLevel() < LogB->GetLogLevel();
+}
+
+bool UELogHelper::CompareLogByLevel_Desc(CUELog * LogA, CUELog * LogB)
+{
+	if (!LogA) return true;
+	if (!LogB) return false;
+	return LogA->GetLogLevel() > LogB->GetLogLevel();
+}
+
+bool UELogHelper::CompareLogByType_Asce(CUELog * LogA, CUELog * LogB)
+{
+	if (!LogA) return false;
+	if (!LogB) return true;
+	return LogA->GetLogType() < LogB->GetLogType();
+}
+
+bool UELogHelper::CompareLogByType_Desc(CUELog * LogA, CUELog * LogB)
+{
+	if (!LogA) return true;
+	if (!LogB) return false;
+	return LogA->GetLogType() > LogB->GetLogType();
 }

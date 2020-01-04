@@ -1,4 +1,5 @@
 #include "Decoder/UE4Log.h"
+#include "Decoder/LogFilter.h"
 #include <stdio.h>
 #include <string>
 #include <algorithm>
@@ -15,12 +16,30 @@ int main()
 	Log.LoadLogFile(Path);
 
 	printf("¹²½âÎö%dÌõLog\n", Log.GetLogCount());
-	std::sort(Log.GetAllLogs().begin(), Log.GetAllLogs().end(), &UELogHelper::CompareLogByTime_Min);
 
-	for (int i = 0; i < 100; i++)
+	vector<string> AllNames = Log.GetLogTypeNames();
+
+	for (auto val : AllNames)
 	{
-		printf("%s\n", Log.GetAllLogs()[i]->GetLogTime().GetTimeStr().GetString().c_str());
+		printf("%s\n", val.c_str());
 	}
+	
+	CUELogFilter Filter(&Log);
+	Filter.CloseAllLogLevelFilter();
+	Filter.CloseAllLogTypeFilter();
+	Filter.OpenLogLevelFilter(ELogLevel::Error);
+	Filter.OpenLogTypeFilter(Log.GetLogTypeCode("LogResMgr"));
+	Filter.Filtrate();
+	
+	decltype(auto) FiltResult = Filter.GetFiltResult();
+	CUELogSorter sorter(FiltResult);
+	sorter.SortByTime_Asce();
+	for (auto val : FiltResult)
+	{
+		printf("%s  %s  %s\n", val->GetLogTime().GetTimeStr().ToString().c_str(), val->GetLogTypeName().ToString().c_str(), val->GetLogContent().ToString().c_str());
+	}
+
+
 
 	system("Pause");
 	return 0;

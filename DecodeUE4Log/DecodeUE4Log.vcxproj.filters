@@ -24,12 +24,18 @@
     <ClCompile Include="Decoder\LogElement.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Decoder\LogFilter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Decoder\UE4Log.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Decoder\LogElement.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Decoder\LogFilter.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

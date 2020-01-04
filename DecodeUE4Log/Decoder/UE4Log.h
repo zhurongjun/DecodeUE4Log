@@ -11,8 +11,12 @@ namespace UELogHelper
 	// 查找Log头的结尾
 	const char * FindLogHeaderEnd(const char * Begin, const char * End);
 	// 比较函数
-	bool CompareLogByTime_Min(CUELog * LogA, CUELog * LogB);
-	bool CompareLogByTime_Max(CUELog * LogA, CUELog * LogB);
+	bool CompareLogByTime_Asce(CUELog * LogA, CUELog * LogB);
+	bool CompareLogByTime_Desc(CUELog * LogA, CUELog * LogB);
+	bool CompareLogByLevel_Asce(CUELog * LogA, CUELog * LogB);
+	bool CompareLogByLevel_Desc(CUELog * LogA, CUELog * LogB);
+	bool CompareLogByType_Asce(CUELog * LogA, CUELog * LogB);
+	bool CompareLogByType_Desc(CUELog * LogA, CUELog * LogB);
 }
 
 class CUELogFile;
@@ -24,12 +28,13 @@ public:
 
 	const CUELogTime & GetLogTime() const { return m_LogTime; }
 	LogTypeCode GetLogType() const { return m_LogTypeCode; }
-	ELogLevel GetLevel() const { return m_Level; }
-	string GetLogContent() const { return m_LogContent.GetString(); }
+	ELogLevel GetLogLevel() const { return m_Level; }
 	CUELogFile * GetLogFile() const { return m_LogFile; }
 
 	void SetLogFile(CUELogFile * file) { m_LogFile = file; }
-	string GetLogTypeName() { return m_LogTypeName.GetString(); }
+
+	CMemcutStr GetLogContent() const { return m_LogContent; }
+	CMemcutStr GetLogTypeName() const { return m_LogTypeName; }
 
 	bool TryDecodeLog(const char * Begin, const char * End, const char * & IndexAfterDecode);
 
@@ -54,9 +59,11 @@ public:
 	bool ContainLogType(string name) const { return m_LogTypeDictionry.Contain(name); }
 	string GetLogTypeName(LogTypeCode code) const { return m_LogTypeDictionry.GetTypeName(code); }
 	LogTypeCode GetLogTypeCode(string name) { return m_LogTypeDictionry.GetTypeCode(name); }
+	vector<string> GetLogTypeNames() { return m_LogTypeDictionry.GetLogTypeNames(); }
+	int GetLogTypeCount() { return m_LogTypeDictionry.GetLogTypeCount(); }
 
 	const CMaskFlyWeight * GetTimeMaskFlyWeight() const { return &m_MaskFlyWeight; }
-	vector<CUELog *> & GetAllLogs() { return m_AllLogs; }
+	const vector<CUELog *> & GetAllLogs() const { return m_AllLogs; }
 	CMemcutStr GetLogHeader() { return m_LogHeader; }
 
 	bool LoadLogFile(const char * Path);

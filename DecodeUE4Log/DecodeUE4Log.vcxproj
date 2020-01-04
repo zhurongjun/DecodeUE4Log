@@ -124,10 +124,12 @@
   <ItemGroup>
     <ClInclude Include="Decoder\UE4Log.h" />
     <ClInclude Include="Decoder\LogElement.h" />
+    <ClInclude Include="Decoder\LogFilter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decoder\UE4Log.cpp" />
     <ClCompile Include="Decoder\LogElement.cpp" />
+    <ClCompile Include="Decoder\LogFilter.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
