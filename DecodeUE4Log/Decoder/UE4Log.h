@@ -71,6 +71,8 @@ public:
 
 	int GetLogCount() { return m_AllLogs.size(); }
 
+	const char * GetBuffer()const { return m_FileContent; }
+
 private:
 	char *				m_FileContent;		// 存储这个Log内容的Buffer
 
